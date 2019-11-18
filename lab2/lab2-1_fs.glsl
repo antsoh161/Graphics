@@ -10,7 +10,9 @@ vec3 hsv2rgb(vec3 c)
 }
 
 void main () {
-	//frag_colour = vec4(vec3(0.5,0.5,0.5)+1,0.5);
-	frag_colour.r = (Normal.x+0.5)*0.5;
-	//frag_colour = Normal;
+	frag_colour = vec4(vec3(0.5,0.5,0.5)+1,0.5);
+	frag_colour.r = (Normal.x+1)*0.5;
+    frag_colour.g = (Normal.y+1)*0.5;
+    frag_colour.b = (Normal.z+1)*0.5;
+    
 }

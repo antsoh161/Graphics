@@ -177,7 +177,7 @@ int main(int argc, char const *argv[])
 	5, 14, 17 // 1 4 5
 	};
 	
-  float normals[4*3*8] = {0}; //4 elements, 3 copies, 8 rows
+  float normals[3*3*8] = {0}; //4 elements, 3 copies, 8 rows
 	std::vector<glm::vec4> nmVector;
   
   for(int i = 0; i < 36; i=i+3){
@@ -192,6 +192,7 @@ int main(int argc, char const *argv[])
     glm::vec4 nm = glm::vec4(u.y*v.z - u.z*v.y, u.z*v.x - u.x*v.z, u.x*v.y - u.y*v.x,0 );
     nmVector.insert(nmVector.end(),nm);
     //Build normals array
+    /*
     normals[4*p1_index] = nm.x;
     normals[4*p1_index+1] = nm.y;
     normals[4*p1_index+2] = nm.z;
@@ -206,8 +207,32 @@ int main(int argc, char const *argv[])
     normals[4*p3_index+1] = nm.y;
     normals[4*p3_index+2] = nm.z;
     normals[4*p3_index+3] = nm.w;
+    */
+    normals[3*p1_index] = nm.x;
+    normals[3*p1_index+1] = nm.y;
+    normals[3*p1_index+2] = nm.z;
+    
+    normals[3*p2_index] = nm.x;
+    normals[3*p2_index+1] = nm.y;
+    normals[3*p2_index+2] = nm.z;
+    
+    normals[3*p3_index] = nm.x;
+    normals[3*p3_index+1]=nm.y;
+    normals[3*p3_index+2]=nm.z;
+    
   }
-            
+    int x = 0;
+    int count = 0;
+    for(int i = 0; i<sizeof(normals)/sizeof(normals[0]);i++){
+      std::cout<<normals[i]<<" ";
+      if(count==2){
+        std::cout<<"\t  |"<<x<<std::endl;
+        x++;
+        count=0;
+      }
+      else
+        count++;
+    }
     
   
     GLuint VAO,VBO,EBO,nmVBO;
@@ -225,22 +250,20 @@ int main(int argc, char const *argv[])
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*  sizeof(GLfloat),(GLvoid*)0);
     //Normals
     glBindBuffer(GL_ARRAY_BUFFER,nmVBO);
-    //glNormalPointer(GL_FLOAT,0,NULL);
     glBufferData(GL_ARRAY_BUFFER,sizeof(normals),normals,GL_STATIC_DRAW);
-    glVertexAttribPointer(1,4,GL_FLOAT,GL_FALSE,4*sizeof(GLfloat),(void*)(3*sizeof(GLfloat)));
+    glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,3*sizeof(GLfloat),(void*)0); //(void*)(3*sizeof(GLfloat) offset?
     //EBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,sizeof(faces),faces,GL_STATIC_DRAW);
     
+  
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // load and compile shaders  "../lab1-7_vs.glsl" and "../lab1-7_fs.glsl"
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
   shader0.update("../lab2-1_vs.glsl","../lab2-1_fs.glsl");
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// attach and link vertex and fragment shaders into a shader program
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
+
   
  
   const float n = 1.0f;
@@ -271,12 +294,19 @@ int main(int argc, char const *argv[])
     
   glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
     
+    
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // multiply your matrices in the right order to get a modelViewProjection matrix and upload it to the appropriate uniform variable in vertex shader
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-    glm::mat4 modelViewMatrix = inverseViewMatrix * modelMatrix;
-    GLuint modelViewLoc = glGetUniformLocation(shader0.shader_program,"modelview");
-    glUniformMatrix4fv(modelViewLoc,1,GL_FALSE,glm::value_ptr(modelViewMatrix));
+    //glm::mat4 modelViewMatrix = inverseViewMatrix * modelMatrix;
+    GLuint modelLoc = glGetUniformLocation(shader0.shader_program,"model");
+    glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(modelMatrix));
+    
+    GLuint viewLoc = glGetUniformLocation(shader0.shader_program,"view");
+    glUniformMatrix4fv(viewLoc,1,GL_FALSE,glm::value_ptr(inverseViewMatrix));
+    
+    //GLuint modelViewLoc = glGetUniformLocation(shader0.shader_program,"modelview");
+    //glUniformMatrix4fv(modelViewLoc,1,GL_FALSE,glm::value_ptr(modelViewMatrix));
     
     //glm::mat4 projectionModelViewMatrix = projectionMatrix * modelViewMatrix;
     
