@@ -191,23 +191,7 @@ int main(int argc, char const *argv[])
 
     glm::vec4 nm = glm::vec4(u.y*v.z - u.z*v.y, u.z*v.x - u.x*v.z, u.x*v.y - u.y*v.x,0 );
     nmVector.insert(nmVector.end(),nm);
-    //Build normals array
-    /*
-    normals[4*p1_index] = nm.x;
-    normals[4*p1_index+1] = nm.y;
-    normals[4*p1_index+2] = nm.z;
-    normals[4*p1_index+3] = nm.w;
-    
-    normals[4*p2_index] = nm.x;
-    normals[4*p2_index+1] = nm.y;
-    normals[4*p2_index+2] = nm.z;
-    normals[4*p2_index+3] = nm.w;
-    
-    normals[4*p3_index] = nm.x;
-    normals[4*p3_index+1] = nm.y;
-    normals[4*p3_index+2] = nm.z;
-    normals[4*p3_index+3] = nm.w;
-    */
+   
     normals[3*p1_index] = nm.x;
     normals[3*p1_index+1] = nm.y;
     normals[3*p1_index+2] = nm.z;

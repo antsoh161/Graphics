@@ -1,4 +1,4 @@
-#ifndef MY_SHADER_H
+#ifndef MY_SHADER
 #define MY_SHADER_H
 #include <GL/glew.h>
 #include <GLFW/glfw3.h> 
