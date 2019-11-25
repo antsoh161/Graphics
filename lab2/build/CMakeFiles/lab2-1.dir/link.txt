@@ -1,0 +1,1 @@
+/usr/bin/c++   -std=c++11 -g  -rdynamic CMakeFiles/lab2-1.dir/lab2-1.cpp.o  -o lab2-1 -lGL -lGLU -lglfw -lGLEW liblodepng.a libreadfile.a 

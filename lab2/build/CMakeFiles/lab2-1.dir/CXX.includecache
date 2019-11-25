@@ -1,0 +1,46 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../../common/readfile.hpp
+string
+-
+
+/home/anton/Documents/graphic-design/lab2/lab2-1.cpp
+GL/glew.h
+-
+GLFW/glfw3.h
+-
+cmath
+-
+cstdlib
+-
+iostream
+-
+vector
+-
+readfile.hpp
+/home/anton/Documents/graphic-design/lab2/readfile.hpp
+my_shader.hpp
+/home/anton/Documents/graphic-design/lab2/my_shader.hpp
+glm/ext.hpp
+-
+glm/gtc/matrix_transform.hpp
+-
+
+/home/anton/Documents/graphic-design/lab2/my_shader.hpp
+GL/glew.h
+-
+GLFW/glfw3.h
+-
+cstdlib
+-
+iostream
+-
+readfile.hpp
+-
+

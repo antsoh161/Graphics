@@ -1,0 +1,24 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/anton/Documents/graphic-design/common/readfile.cpp
+readfile.hpp
+/home/anton/Documents/graphic-design/common/readfile.hpp
+vector
+-
+algorithm
+-
+iostream
+-
+fstream
+-
+
+/home/anton/Documents/graphic-design/common/readfile.hpp
+string
+-
+
