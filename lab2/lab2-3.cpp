@@ -220,14 +220,14 @@ int main(int argc, char const *argv[])
     glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
     
      //Send light
-    int light_count = 2;
+    int light_count = 1;
     GLuint light_countLoc = glGetUniformLocation(shader0.shader_program,"light_count");
     glUniform1i(light_countLoc,light_count);
     
     //light position
-    glm::vec4 light_position[4] = { glm::vec4(0, 5.0f,0,0),
-                                    glm::vec4(0,0,5.0f,0),
-                                    glm::vec4(0),
+    glm::vec4 light_position[4] = { glm::vec4(0, 0, 5.0f, 0),
+                                    glm::vec4(-5.0f, 0, 0, 0),
+                                    glm::vec4(0, 5.0f, 0, 0),
                                     glm::vec4(0) };
     GLuint light_positionLoc = glGetUniformLocation(shader0.shader_program,"light_position");
     glUniform4fv(light_positionLoc,4,glm::value_ptr(light_position[0]));
@@ -235,8 +235,8 @@ int main(int argc, char const *argv[])
     //Light colour
     glm::vec4 light_colour[4] = { glm::vec4(1.0f,1.0f,1.0f,0),
                                   glm::vec4(1.0f,1.0f,1.0f,0),
-                                  glm::vec4(0),
-                                  glm::vec4(0) };
+                                  glm::vec4(1.0f,1.0f,1.0f,0),
+                                  glm::vec4(1.0f,1.0f,1.0f,0) };
     GLuint light_colourLoc = glGetUniformLocation(shader0.shader_program,"light_colour");
     glUniform4fv(light_colourLoc,4,glm::value_ptr(light_colour[0]));
     

@@ -8,7 +8,6 @@ uniform mat4 view;
 out vec4 Normal;
 out vec4 position;
 out vec4 viewPosition;
-
 /*
 void main () {
 	
@@ -24,7 +23,9 @@ void main () {
  
  void main() {
  	gl_Position = projection*view*model*vp;
-	position = view*vp;
-  position = position;
+	position = model*vp;
 	Normal = model*normals;
+	viewPosition = vec4(0.0,0.0,2.0,0);
+	
+ 
  }
