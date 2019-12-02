@@ -16,6 +16,8 @@
 // You can store the rotation angles here, for example
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 my_shader shader0;
+GLuint smoothness_factor = 1;
+int light_count = 2;
 
 void checkShaderCompileError(GLint shaderID)
 {
@@ -75,6 +77,29 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
       shader0.y_rot_angle +=M_PI/12;
       shader0.x_rot_angle = shader0.y_rot_angle;
     }
+	
+	//Smoothness factor
+	if ((key == GLFW_KEY_O) && (action == GLFW_PRESS || action==GLFW_REPEAT) && smoothness_factor < 1000)
+    {
+      //implement reloading of the shaders on the fly
+		smoothness_factor = smoothness_factor+10;
+		printf("Smoothness Factor: %d\n",smoothness_factor);
+    } 
+	if ((key == GLFW_KEY_P) && (action == GLFW_PRESS || action==GLFW_REPEAT) && smoothness_factor > 1)
+    {
+		smoothness_factor = smoothness_factor-10;
+		printf("Smoothness Factor: %d\n",smoothness_factor);
+    }
+  if ((key == GLFW_KEY_U) &&  (action == GLFW_PRESS))
+      if(light_count > 1){
+        light_count--;
+        printf("Lights decreased to %d\n",light_count);
+      }
+  if ((key == GLFW_KEY_I) &&  (action == GLFW_PRESS))
+      if(light_count < 4){
+        light_count++;
+        printf("Lights increased to %d\n",light_count);
+      }
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -173,6 +198,7 @@ int main(int argc, char const *argv[])
     glBindBuffer(GL_ARRAY_BUFFER,nmVBO);
     glBufferData(GL_ARRAY_BUFFER,shapes[0].mesh.normals.size() * sizeof(float),&shapes[0].mesh.normals.at(0),GL_STATIC_DRAW);
     glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,3*sizeof(GLfloat),(GLvoid*)0); //(void*)(3*sizeof(GLfloat) offset?
+	
     //EBO
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER,EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER,shapes[0].mesh.indices.size() * sizeof(unsigned int),&shapes[0].mesh.indices.at(0),GL_STATIC_DRAW);
@@ -220,26 +246,28 @@ int main(int argc, char const *argv[])
     glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
     
      //Send light
-    int light_count = 2;
     GLuint light_countLoc = glGetUniformLocation(shader0.shader_program,"light_count");
     glUniform1i(light_countLoc,light_count);
     
     //light position
-    glm::vec4 light_position[4] = { glm::vec4(0, 5.0f,0,0),
-                                    glm::vec4(-0.5,0,0,0),
-                                    glm::vec4(0),
-                                    glm::vec4(0) };
+    glm::vec4 light_position[4] = { glm::vec4(0, 0, 5.0f, 0),
+                                    glm::vec4(0, 5.0f, 0, 0),
+                                    glm::vec4(5.0f,0 , 0, 0),
+                                    glm::vec4(5.0f,5.0f,5.0f,0) };
+    
     GLuint light_positionLoc = glGetUniformLocation(shader0.shader_program,"light_position");
     glUniform4fv(light_positionLoc,4,glm::value_ptr(light_position[0]));
    
     //Light colour
     glm::vec4 light_colour[4] = { glm::vec4(1.0f,1.0f,1.0f,0),
+                                  glm::vec4(0.5f,0.5f,0.5f,0),
                                   glm::vec4(1.0f,1.0f,1.0f,0),
-                                  glm::vec4(0),
-                                  glm::vec4(0) };
+                                  glm::vec4(1.0f,1.0f,1.0f,0) };
     GLuint light_colourLoc = glGetUniformLocation(shader0.shader_program,"light_colour");
     glUniform4fv(light_colourLoc,4,glm::value_ptr(light_colour[0]));
     
+	//Smoothness factor
+  	glUniform1i(glGetUniformLocation(shader0.shader_program,"smoothness_factor"),smoothness_factor);
     
     //
     //Send model

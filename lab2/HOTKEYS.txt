@@ -1,0 +1,8 @@
+HOTKEYS
+
+O Decrease blinn-phong shininess
+P Increase blinn-phong shininess
+T Spin around both X and Y axis
+Arrow keys Rotate
+U Increase lights (4 max)
+I decrease lights (1 min)
