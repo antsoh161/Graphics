@@ -33,7 +33,7 @@ void main () {
   for (int l = 0; l < light_count;++l){
     vec3 lightDir = normalize(light_position[l].xyz - position.xyz);
     vec3 brdf = blinn_phong_brdf(lightDir, view_direction, norm);
-    color_sum += light_colour[l].xyz * brdf * max(dot(lightDir, norm),0.0);    
+    color_sum += light_colour[l].xyz * brdf * max(dot(lightDir, norm),0.0);
   }
   frag_colour = vec4(vec3(ambient),1)+ vec4(vec3(color_sum),1);
 }

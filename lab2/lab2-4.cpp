@@ -260,7 +260,7 @@ int main(int argc, char const *argv[])
    
     //Light colour
     glm::vec4 light_colour[4] = { glm::vec4(1.0f,1.0f,1.0f,0),
-                                  glm::vec4(0.5f,0.5f,0.5f,0),
+                                  glm::vec4(1.0f,1.0f,1.0f,0),
                                   glm::vec4(1.0f,1.0f,1.0f,0),
                                   glm::vec4(1.0f,1.0f,1.0f,0) };
     GLuint light_colourLoc = glGetUniformLocation(shader0.shader_program,"light_colour");

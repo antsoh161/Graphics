@@ -17,6 +17,7 @@
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 my_shader shader0;
 GLuint smoothness_factor = 1;
+int light_count = 1;
 
 void checkShaderCompileError(GLint shaderID)
 {
@@ -90,7 +91,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		smoothness_factor = smoothness_factor-10;
 		printf("Smoothness Factor: %d\n",smoothness_factor);
     } 
-
+    if ((key == GLFW_KEY_U) &&  (action == GLFW_PRESS))
+      if(light_count > 1){
+        light_count--;
+        printf("Lights decreased to %d\n",light_count);
+      }
+  if ((key == GLFW_KEY_I) &&  (action == GLFW_PRESS))
+      if(light_count < 4){
+        light_count++;
+        printf("Lights increased to %d\n",light_count);
+      }
 
 }
 
@@ -238,7 +248,6 @@ int main(int argc, char const *argv[])
     glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
     
      //Send light
-    int light_count = 1;
     GLuint light_countLoc = glGetUniformLocation(shader0.shader_program,"light_count");
     glUniform1i(light_countLoc,light_count);
     
