@@ -58,7 +58,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if ((key == GLFW_KEY_R) && action == GLFW_PRESS)
     {
       //implement reloading of the shaders on the fly
-		shader0.update("../lab2-3_vs.glsl","../lab2-3_fs.glsl");
+		shader0.update("../lab2-3_vs2.glsl","../lab2-3_fs2.glsl");
     } 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//

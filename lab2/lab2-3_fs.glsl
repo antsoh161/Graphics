@@ -11,7 +11,6 @@ uniform vec4 light_position[4]; // can have up to 4 light sources
 uniform vec4 light_colour[4];
 
 
-
 vec3 blinn_phong_brdf(vec3 light_dir, vec3 view_direction, vec3 normal){
   float kL = 0.5;
   float kg = 0.5;

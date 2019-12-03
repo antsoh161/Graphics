@@ -16,8 +16,8 @@
 // You can store the rotation angles here, for example
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 my_shader shader0;
-GLuint smoothness_factor = 1;
-int light_count = 2;
+float roughness_factor = 0.5;
+int light_count = 1;
 
 void checkShaderCompileError(GLint shaderID)
 {
@@ -58,7 +58,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     if ((key == GLFW_KEY_R) && action == GLFW_PRESS)
     {
       //implement reloading of the shaders on the fly
-		shader0.update("../lab2-4_vs.glsl","../lab2-4_fs.glsl");
+		shader0.update("../lab2-4_vs2.glsl","../lab2-4_fs2.glsl");
     } 
 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
@@ -79,16 +79,16 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 	
 	//Smoothness factor
-	if ((key == GLFW_KEY_O) && (action == GLFW_PRESS || action==GLFW_REPEAT) && smoothness_factor < 1000)
+	if ((key == GLFW_KEY_O) && (action == GLFW_PRESS || action==GLFW_REPEAT) && roughness_factor < 1.0)
     {
       //implement reloading of the shaders on the fly
-		smoothness_factor = smoothness_factor+10;
-		printf("Smoothness Factor: %d\n",smoothness_factor);
+		roughness_factor += 0.1;
+		printf("roughness Factor: %f\n",roughness_factor);
     } 
-	if ((key == GLFW_KEY_P) && (action == GLFW_PRESS || action==GLFW_REPEAT) && smoothness_factor > 1)
+	if ((key == GLFW_KEY_P) && (action == GLFW_PRESS || action==GLFW_REPEAT) && roughness_factor > 0.1)
     {
-		smoothness_factor = smoothness_factor-10;
-		printf("Smoothness Factor: %d\n",smoothness_factor);
+		roughness_factor -= 0.1;
+		printf("Roughness Factor: %f\n",roughness_factor);
     }
   if ((key == GLFW_KEY_U) &&  (action == GLFW_PRESS))
       if(light_count > 1){
@@ -209,7 +209,7 @@ int main(int argc, char const *argv[])
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // load and compile shaders  "../lab1-7_vs.glsl" and "../lab1-7_fs.glsl"
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-  shader0.update("../lab2-4_vs.glsl","../lab2-4_fs.glsl");  
+  shader0.update("../lab2-4_vs2.glsl","../lab2-4_fs2.glsl");  
  
   const float n = 1.0f;
   const float f = 100.0f;
@@ -252,7 +252,7 @@ int main(int argc, char const *argv[])
     //light position
     glm::vec4 light_position[4] = { glm::vec4(0, 0, 5.0f, 0),
                                     glm::vec4(0, 5.0f, 0, 0),
-                                    glm::vec4(5.0f,0 , 0, 0),
+                                    glm::vec4(-5.0f,0 , 0, 0),
                                     glm::vec4(5.0f,5.0f,5.0f,0) };
     
     GLuint light_positionLoc = glGetUniformLocation(shader0.shader_program,"light_position");
@@ -267,9 +267,12 @@ int main(int argc, char const *argv[])
     glUniform4fv(light_colourLoc,4,glm::value_ptr(light_colour[0]));
     
 	//Smoothness factor
-  	glUniform1i(glGetUniformLocation(shader0.shader_program,"smoothness_factor"),smoothness_factor);
+  	glUniform1f(glGetUniformLocation(shader0.shader_program,"roughness_factor"),roughness_factor);
     
-    //
+    //Viewer position
+  	glm::vec3 view_pos(0.0f,0.0f,2.0f);
+  	glUniform3fv(glGetUniformLocation(shader0.shader_program,"view_pos"),1,glm::value_ptr(view_pos));
+	  
     //Send model
     GLuint modelLoc = glGetUniformLocation(shader0.shader_program,"model");
     glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(modelMatrix));
