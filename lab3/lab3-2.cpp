@@ -15,8 +15,9 @@
 // You can store the rotation angles here, for example
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 my_shader shader0;
-int smoothness_factor = 1;
-int light_count = 1;
+float roughness_factor = 0.5;
+int light_count = 2;
+
 void checkShaderCompileError(GLint shaderID)
 {
   GLint isCompiled = 0;
@@ -64,31 +65,30 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
   
     if ((key == GLFW_KEY_RIGHT) && ( (action == GLFW_PRESS) || action==GLFW_REPEAT) )
-      shader0.x_rot_angle += M_PI/12;
+      shader0.x_rot_angle += M_PI/100;
     if ((key == GLFW_KEY_LEFT) && ( (action == GLFW_PRESS) || action==GLFW_REPEAT) )
-      shader0.x_rot_angle -= M_PI/12;
+      shader0.x_rot_angle -= M_PI/100;
     if ((key == GLFW_KEY_UP) && ( (action == GLFW_PRESS) || action==GLFW_REPEAT) )   
-      shader0.y_rot_angle += M_PI/12;
+      shader0.y_rot_angle += M_PI/100;
     if ((key == GLFW_KEY_DOWN) && ( (action == GLFW_PRESS) || action==GLFW_REPEAT) ) 
-      shader0.y_rot_angle -= M_PI/12;
+      shader0.y_rot_angle -= M_PI/100;
     if((key == GLFW_KEY_T) && ( (action == GLFW_PRESS) || action==GLFW_REPEAT)){
-      shader0.y_rot_angle +=M_PI/12;
+      shader0.y_rot_angle +=M_PI/100;
       shader0.x_rot_angle = shader0.y_rot_angle;
     }
-  //Smoothness factor
-	if ((key == GLFW_KEY_O) && (action == GLFW_PRESS || action==GLFW_REPEAT) && smoothness_factor < 1000)
+  	//Smoothness factor
+	if ((key == GLFW_KEY_O) && (action == GLFW_PRESS || action==GLFW_REPEAT) && roughness_factor < 1.0)
     {
       //implement reloading of the shaders on the fly
-		smoothness_factor = smoothness_factor+10;
-		printf("Smoothness Factor: %d\n",smoothness_factor);
+		roughness_factor += 0.1;
+		printf("roughness Factor: %f\n",roughness_factor);
     } 
-	if ((key == GLFW_KEY_P) && (action == GLFW_PRESS || action==GLFW_REPEAT) && smoothness_factor > 1)
+	if ((key == GLFW_KEY_P) && (action == GLFW_PRESS || action==GLFW_REPEAT) && roughness_factor > 0.1)
     {
-		
-		smoothness_factor = smoothness_factor-10;
-		printf("Smoothness Factor: %d\n",smoothness_factor);
-    } 
-    if ((key == GLFW_KEY_U) &&  (action == GLFW_PRESS))
+		roughness_factor -= 0.1;
+		printf("Roughness Factor: %f\n",roughness_factor);
+    }
+  if ((key == GLFW_KEY_U) &&  (action == GLFW_PRESS))
       if(light_count > 1){
         light_count--;
         printf("Lights decreased to %d\n",light_count);
@@ -383,37 +383,56 @@ int main(int argc, char const *argv[])
     glGenTextures(1,&texture_handle);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_CUBE_MAP,texture_handle);
-  /*
+  
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  */
+  
     
     unsigned char* image_data;
     unsigned image_w;
     unsigned image_h;
+    //Debugging cube
+  /*
+    std::vector<std::string> cube_faces = {
+      "../../common/data/cube-test_000.png",
+      "../../common/data/cube-test_001.png",
+      "../../common/data/cube-test_010.png",
+      "../../common/data/cube-test_011.png",
+      "../../common/data/cube-test_101.png",
+      "../../common/data/cube-test_110.png"
+    };
+    */
+    std::vector<std::string> cube_faces = {
+      "../../common/data/cube-room_001.png",
+      "../../common/data/cube-room_010.png",
+      "../../common/data/cube-room_011.png",
+      "../../common/data/cube-room_100.png",
+      "../../common/data/cube-room_101.png",
+      "../../common/data/cube-room_110.png"
+    };
   
-    unsigned image_file = 
-      lodepng_decode32_file(&image_data,&image_w, &image_h,
-                            "../../common/data/cube_room_001.png");
-    std::cout << "Read " << image_h << " x " << image_w << " image\n";     
-  
-    for(int i = 0; i < num_faces; i++){
-      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X+i,0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
-    //glGenerateMipmap(GL_TEXTURE_2D);
+    for(int i = 0; i < cube_faces.size(); i++){
+      unsigned image_file = lodepng_decode32_file(&image_data,&image_w, &image_h,cube_faces[i].c_str());
+      std::cout << "Read " << image_h << " x " << image_w << " image\n";
+      glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
     }
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-  glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE); 
-  glUniform1i(glGetUniformLocation(shader0.shader_program, "env_sampler"),0);
-     
+  
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);    
+
+  
+    //unsigned image_file = lodepng_decode32_file(&image_data,&image_w, &image_h,"../../common/data/cube-test_100.png");
+    //std::cout << "Read " << image_h << " x " << image_w << " image\n";    
+    //glTexImage2D(GL_TEXTURE_2D,0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+    //glGenerateMipmap(GL_TEXTURE_2D);
     
+    glUniform1i(glGetUniformLocation(shader0.shader_program, "env_sampler"),0);
     //-------------------------------------------------------------------------------------------------------------------------------------------------------//
-  
-  
   
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // load and compile shaders  "../lab1-7_vs.glsl" and "../lab1-7_fs.glsl"
@@ -425,7 +444,6 @@ int main(int argc, char const *argv[])
   const float n = 1.0f;
   const float f = 100.0f;
   
-
   while (!glfwWindowShouldClose (window)) 
   {
 
@@ -435,40 +453,33 @@ int main(int argc, char const *argv[])
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // use glm::perspective to create a Projection matrix
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-  glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f),800.0f/600.0f,n,f); // W/H instead
+    glm::mat4 projectionMatrix = glm::perspective(glm::radians(90.0f),800.0f/600.0f,n,f); // W/H instead
   
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // use glm::translate, glm::rotate and glm::inverse to create the model and view matrices
 //---------------------------------------------------------------------------------------------vmat--------------------------------------------------------------//
   
-  glm::mat4 modelMatrix = glm::mat4(1.0f);  //init to identity matrix
-  modelMatrix = glm::rotate(modelMatrix,shader0.x_rot_angle,glm::vec3(1.0f,0.0f,0.0f)); //x-rotation
-  modelMatrix = glm::rotate(modelMatrix,shader0.y_rot_angle,glm::vec3(0.0f,1.0f,0.0f)); //y-rotation
-  
-  glm::mat4 viewMatrix = glm::mat4(1.0f);
-  viewMatrix = glm::translate(viewMatrix,glm::vec3(0.0f,0.0f,2.0f));
+    glm::mat4 modelMatrix = glm::mat4(1.0f);  //init to identity matrix
     
-  glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
+    modelMatrix = glm::rotate(modelMatrix,shader0.x_rot_angle,glm::vec3(1.0f,0.0f,0.0f)); //x-rotation
+    modelMatrix = glm::rotate(modelMatrix,shader0.y_rot_angle,glm::vec3(0.0f,1.0f,0.0f)); //y-rotation  
     
     
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-// multiply your matrices in the right order to get a modelViewProjection matrix and upload it to the appropriate uniform variable in vertex shader
-//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-    GLuint modelLoc = glGetUniformLocation(shader0.shader_program,"model");
-    glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(modelMatrix));
+    glm::mat4 viewMatrix = glm::mat4(1.0f);
+    viewMatrix = glm::translate(viewMatrix,glm::vec3(0.0f,0.0f,2.0f));
     
-    GLuint viewLoc = glGetUniformLocation(shader0.shader_program,"view");
-    glUniformMatrix4fv(viewLoc,1,GL_FALSE,glm::value_ptr(inverseViewMatrix));
+    glm::mat4 inverseViewMatrix = glm::inverse(viewMatrix);
     
-      //Send light
+     //Send light
     GLuint light_countLoc = glGetUniformLocation(shader0.shader_program,"light_count");
     glUniform1i(light_countLoc,light_count);
     
     //light position
     glm::vec4 light_position[4] = { glm::vec4(0, 0, 5.0f, 0),
-                                    glm::vec4(-5.0f, 0, 0, 0),
                                     glm::vec4(0, 5.0f, 0, 0),
-                                    glm::vec4(0) };
+                                    glm::vec4(-5.0f,0 , 0, 0),
+                                    glm::vec4(5.0f,5.0f,5.0f,0) };
+    
     GLuint light_positionLoc = glGetUniformLocation(shader0.shader_program,"light_position");
     glUniform4fv(light_positionLoc,4,glm::value_ptr(light_position[0]));
    
@@ -480,15 +491,24 @@ int main(int argc, char const *argv[])
     GLuint light_colourLoc = glGetUniformLocation(shader0.shader_program,"light_colour");
     glUniform4fv(light_colourLoc,4,glm::value_ptr(light_colour[0]));
     
-	//Smoothness factor
-  	glUniform1i(glGetUniformLocation(shader0.shader_program,"smoothness_factor"),smoothness_factor);
+	  //Roughness factor
+  	glUniform1f(glGetUniformLocation(shader0.shader_program,"roughness_factor"),roughness_factor);
     
+    //Viewer position
+  	glm::vec3 view_pos(0.0f,0.0f,2.0f);
+  	glUniform3fv(glGetUniformLocation(shader0.shader_program,"view_pos"),1,glm::value_ptr(view_pos));
+	  
+    //Send model
+    GLuint modelLoc = glGetUniformLocation(shader0.shader_program,"model");
+    glUniformMatrix4fv(modelLoc,1,GL_FALSE,glm::value_ptr(modelMatrix));
     
+    //Send view
+    GLuint viewLoc = glGetUniformLocation(shader0.shader_program,"view");
+    glUniformMatrix4fv(viewLoc,1,GL_FALSE,glm::value_ptr(inverseViewMatrix));
+    
+    //Send projetion    
     GLuint transformLoc = glGetUniformLocation(shader0.shader_program,"projection");
     glUniformMatrix4fv(transformLoc,1,GL_FALSE,glm::value_ptr(projectionMatrix));
-    
-    glBindTexture(GL_TEXTURE_2D,texture_handle);
-    
 
     // update other events like input handling 
     glfwPollEvents ();
@@ -496,17 +516,22 @@ int main(int argc, char const *argv[])
     // clear the drawing surface
     glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    
+    
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // Issue an appropriate glDraw*() command.
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
     glDrawElements(GL_TRIANGLES,num_indices,GL_UNSIGNED_SHORT,0);
+    //glDrawArrays(GL_TRIANGLES,0,shapes[0].mesh.positions.size());
     glfwSwapBuffers (window);
+    
   }
 
   // close GL context and any other GLFW resources
   glfwTerminate();
   exit(EXIT_SUCCESS);
 }
+
 
 
 
