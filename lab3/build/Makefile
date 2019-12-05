@@ -111,6 +111,32 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named lodepng
+
+# Build rule for target.
+lodepng: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 lodepng
+.PHONY : lodepng
+
+# fast build rule for target.
+lodepng/fast:
+	$(MAKE) -f CMakeFiles/lodepng.dir/build.make CMakeFiles/lodepng.dir/build
+.PHONY : lodepng/fast
+
+#=============================================================================
+# Target rules for targets named readfile
+
+# Build rule for target.
+readfile: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 readfile
+.PHONY : readfile
+
+# fast build rule for target.
+readfile/fast:
+	$(MAKE) -f CMakeFiles/readfile.dir/build.make CMakeFiles/readfile.dir/build
+.PHONY : readfile/fast
+
+#=============================================================================
 # Target rules for targets named lab3-2
 
 # Build rule for target.
@@ -137,30 +163,30 @@ lab3-1/fast:
 .PHONY : lab3-1/fast
 
 #=============================================================================
-# Target rules for targets named readfile
+# Target rules for targets named lab3-3
 
 # Build rule for target.
-readfile: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 readfile
-.PHONY : readfile
+lab3-3: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 lab3-3
+.PHONY : lab3-3
 
 # fast build rule for target.
-readfile/fast:
-	$(MAKE) -f CMakeFiles/readfile.dir/build.make CMakeFiles/readfile.dir/build
-.PHONY : readfile/fast
+lab3-3/fast:
+	$(MAKE) -f CMakeFiles/lab3-3.dir/build.make CMakeFiles/lab3-3.dir/build
+.PHONY : lab3-3/fast
 
 #=============================================================================
-# Target rules for targets named lodepng
+# Target rules for targets named lab3-4
 
 # Build rule for target.
-lodepng: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 lodepng
-.PHONY : lodepng
+lab3-4: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 lab3-4
+.PHONY : lab3-4
 
 # fast build rule for target.
-lodepng/fast:
-	$(MAKE) -f CMakeFiles/lodepng.dir/build.make CMakeFiles/lodepng.dir/build
-.PHONY : lodepng/fast
+lab3-4/fast:
+	$(MAKE) -f CMakeFiles/lab3-4.dir/build.make CMakeFiles/lab3-4.dir/build
+.PHONY : lab3-4/fast
 
 home/anton/Documents/graphic-design/common/lodepng.o: home/anton/Documents/graphic-design/common/lodepng.cpp.o
 
@@ -270,6 +296,60 @@ lab3-2.cpp.s:
 	$(MAKE) -f CMakeFiles/lab3-2.dir/build.make CMakeFiles/lab3-2.dir/lab3-2.cpp.s
 .PHONY : lab3-2.cpp.s
 
+lab3-3.o: lab3-3.cpp.o
+
+.PHONY : lab3-3.o
+
+# target to build an object file
+lab3-3.cpp.o:
+	$(MAKE) -f CMakeFiles/lab3-3.dir/build.make CMakeFiles/lab3-3.dir/lab3-3.cpp.o
+.PHONY : lab3-3.cpp.o
+
+lab3-3.i: lab3-3.cpp.i
+
+.PHONY : lab3-3.i
+
+# target to preprocess a source file
+lab3-3.cpp.i:
+	$(MAKE) -f CMakeFiles/lab3-3.dir/build.make CMakeFiles/lab3-3.dir/lab3-3.cpp.i
+.PHONY : lab3-3.cpp.i
+
+lab3-3.s: lab3-3.cpp.s
+
+.PHONY : lab3-3.s
+
+# target to generate assembly for a file
+lab3-3.cpp.s:
+	$(MAKE) -f CMakeFiles/lab3-3.dir/build.make CMakeFiles/lab3-3.dir/lab3-3.cpp.s
+.PHONY : lab3-3.cpp.s
+
+lab3-4.o: lab3-4.cpp.o
+
+.PHONY : lab3-4.o
+
+# target to build an object file
+lab3-4.cpp.o:
+	$(MAKE) -f CMakeFiles/lab3-4.dir/build.make CMakeFiles/lab3-4.dir/lab3-4.cpp.o
+.PHONY : lab3-4.cpp.o
+
+lab3-4.i: lab3-4.cpp.i
+
+.PHONY : lab3-4.i
+
+# target to preprocess a source file
+lab3-4.cpp.i:
+	$(MAKE) -f CMakeFiles/lab3-4.dir/build.make CMakeFiles/lab3-4.dir/lab3-4.cpp.i
+.PHONY : lab3-4.cpp.i
+
+lab3-4.s: lab3-4.cpp.s
+
+.PHONY : lab3-4.s
+
+# target to generate assembly for a file
+lab3-4.cpp.s:
+	$(MAKE) -f CMakeFiles/lab3-4.dir/build.make CMakeFiles/lab3-4.dir/lab3-4.cpp.s
+.PHONY : lab3-4.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -277,11 +357,13 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
-	@echo "... lab3-2"
 	@echo "... rebuild_cache"
-	@echo "... lab3-1"
-	@echo "... readfile"
 	@echo "... lodepng"
+	@echo "... readfile"
+	@echo "... lab3-2"
+	@echo "... lab3-1"
+	@echo "... lab3-3"
+	@echo "... lab3-4"
 	@echo "... home/anton/Documents/graphic-design/common/lodepng.o"
 	@echo "... home/anton/Documents/graphic-design/common/lodepng.i"
 	@echo "... home/anton/Documents/graphic-design/common/lodepng.s"
@@ -294,6 +376,12 @@ help:
 	@echo "... lab3-2.o"
 	@echo "... lab3-2.i"
 	@echo "... lab3-2.s"
+	@echo "... lab3-3.o"
+	@echo "... lab3-3.i"
+	@echo "... lab3-3.s"
+	@echo "... lab3-4.o"
+	@echo "... lab3-4.i"
+	@echo "... lab3-4.s"
 .PHONY : help
 
 

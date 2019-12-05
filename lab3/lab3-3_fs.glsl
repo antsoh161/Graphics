@@ -3,8 +3,13 @@
 in vec3 world_pos;
 in vec3 Normal;
 in vec2 UV_coords;
+in vec3 tang_pos;
+in vec3 bitang_pos;
+in mat4 TBN;
 
-uniform samplerCube env_sampler;
+
+uniform sampler2D tex_sampler;
+uniform sampler2D nmap_sampler;
 uniform vec3 view_pos;
 uniform float roughness_factor;
 uniform int light_count;
@@ -159,30 +164,29 @@ vec3 cook_torrance_brdf(vec3 L, vec3 V, vec3 N){
 
 
 void main () {
-    
+
   vec3 objectColour = vec3(1,1,1);
   /*
-	objectColour.r = (Normal.x+1)*0.5;
+  objectColour.r = (Normal.x+1)*0.5;
   objectColour.g = (Normal.y+1)*0.5;
   objectColour.b = (Normal.z+1)*0.5;
   */
   
   vec3 ambient =  0.5*objectColour; 
-	vec3 V = normalize(view_pos-world_pos);
-	vec3 N = normalize(Normal);
-	vec3 ref_V = reflect(-V,N);
-  vec4 tex = texture(env_sampler, ref_V);
-  
-	vec3 light_out = vec3(0.0);
-	for(int l = 0; l < light_count; ++l){
-		vec3 L = normalize(light_position[l].xyz - world_pos);
-		vec3 brdf = cook_torrance_brdf(L,V,N);
-		light_out += light_colour[l].xyz * brdf * max(dot(L,N),0.0);
-	}
-  
-	vec4 lab2_colour = vec4(light_out,1.0);
-  
-  frag_colour = tex + lab2_colour;
-	
+  vec3 V = normalize(view_pos-world_pos);
+  vec3 N = normalize(Normal);
+  vec3 ref_V = reflect(-V,N);
+  vec4 tex = texture(tex_sampler, UV_coords);
+
+  vec3 light_out = vec3(0.0);
+  for(int l = 0; l < light_count; ++l){
+    vec3 L =  normalize(light_position[l].xyz - world_pos);
+    vec3 brdf = cook_torrance_brdf(L,V,N);
+    light_out += light_colour[l].xyz * brdf * max(dot(L,N),0.0);
+  }
+
+  vec4 lab2_colour = vec4(light_out,1.0);
+
+  frag_colour = tex * lab2_colour;
     
 }

@@ -18,5 +18,9 @@ set(common_libs ${OPENGL_LIBRARIES} ${GLFW_LIBRARIES} ${GLEW_LIBRARIES} lodepng 
 
 add_executable(lab3-1 					lab3-1.cpp )
 add_executable(lab3-2 lab3-2.cpp)
+add_executable(lab3-3 lab3-3.cpp)
+add_executable(lab3-4 lab3-4.cpp)
 target_link_libraries(lab3-1  			${common_libs})
 target_link_libraries(lab3-2 ${common_libs})
+target_link_libraries(lab3-3 ${common_libs})
+target_link_libraries(lab3-4 ${common_libs})
