@@ -5,7 +5,6 @@ in vec3 Normal;
 in vec2 UV_coords;
 in vec3 tang_pos;
 in vec3 bitang_pos;
-in mat4 TBN;
 
 
 uniform sampler2D tex_sampler;
@@ -140,7 +139,7 @@ vec3 cook_torrance_brdf(vec3 light_dir, vec3 view_dir, vec3 normal){
   
 vec3 cook_torrance_brdf(vec3 L, vec3 V, vec3 N){
   vec3 albedo = normalize(vec3(253,227,78)); // Albedo of gold
-  float metallic = 0.0;
+  float metallic = 1.0;
   vec3 F0 = vec3(0.04);
   F0 = mix(F0,albedo,metallic);
    
@@ -165,28 +164,34 @@ vec3 cook_torrance_brdf(vec3 L, vec3 V, vec3 N){
 
 void main () {
 
-  vec3 objectColour = vec3(1,1,1);
-  /*
-  objectColour.r = (Normal.x+1)*0.5;
-  objectColour.g = (Normal.y+1)*0.5;
-  objectColour.b = (Normal.z+1)*0.5;
-  */
+  vec4 objectColour = vec4(0.7,0,0,0)*0.3;
   
-  vec3 ambient =  0.5*objectColour; 
+  //objectColour.r = (Normal.x+1)*0.5;
+  //objectColour.g = (Normal.y+1)*0.5;
+  //objectColour.b = (Normal.z+1)*0.5;
+  
+  vec3 T = normalize(tang_pos);
+  vec3 B = normalize(bitang_pos);
+  vec3 N_N = normalize(Normal);
+  mat3 TBN = mat3(T,B,N_N);
+  
+  vec4 ambient =  0.5*objectColour; 
   vec3 V = normalize(view_pos-world_pos);
-  vec3 N = normalize(Normal);
+  
+  vec3 N = texture(nmap_sampler,UV_coords).xyz;
+  N = normalize(N *2.0 - 1.0);
+  N = normalize(TBN*N);
+  //N = normalize(Normal);
   vec3 ref_V = reflect(-V,N);
   vec4 tex = texture(tex_sampler, UV_coords);
+  vec4 tex2 = texture(nmap_sampler,UV_coords);
 
   vec3 light_out = vec3(0.0);
   for(int l = 0; l < light_count; ++l){
-    vec3 L =  normalize(light_position[l].xyz - world_pos);
+    vec3 L = normalize(light_position[l].xyz - world_pos);
     vec3 brdf = cook_torrance_brdf(L,V,N);
     light_out += light_colour[l].xyz * brdf * max(dot(L,N),0.0);
   }
 
-  vec4 lab2_colour = vec4(light_out,1.0);
-
-  frag_colour = tex * lab2_colour;
-    
+  frag_colour = vec4(light_out,1)*tex;//* vec4(light_out,1);
 }

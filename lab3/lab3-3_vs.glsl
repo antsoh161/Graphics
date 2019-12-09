@@ -13,19 +13,17 @@ out vec3 Normal;
 out vec2 UV_coords;
 out vec3 tang_pos;
 out vec3 bitang_pos;
-out mat3 TBN;
 
 void main () {
   world_pos = (model*vp).xyz;
-	Normal = (model*normals).xyz;
+  Normal = (model*normals).xyz;
 	UV_coords = uv_coords;
     
   //mat4 TBN = mat4(tangent,bitangent,normals,vec4(0,0,0,1));
-  mat3 TBN = transpose(mat3(normalize(model*tangent),normalize(model*bitangent),normalize(model*normals)));
-  
+
+  tang_pos = (model*tangent).xyz;
+  bitang_pos = (model*bitangent).xyz;
   
 	gl_Position = projection*view*model*vp;
-  
-  
 };
   

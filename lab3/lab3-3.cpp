@@ -98,11 +98,45 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
         light_count++;
         printf("Lights increased to %d\n",light_count);
       }
+  
+  
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
+}
+
+unsigned int loadTexture(char const * path)
+{
+    unsigned int textureID;
+    glGenTextures(1, &textureID);
+
+    unsigned image_w, image_h;
+    unsigned char* image_data;
+    lodepng_decode32_file(&image_data,&image_w, &image_h,path);
+    std::cout << "Read " << image_h << " x " << image_w << " image\n"; 
+  
+    if (image_data)
+    {
+        glBindTexture(GL_TEXTURE_2D, textureID);
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        glGenerateMipmap(GL_TEXTURE_2D);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_RGBA == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_RGBA == GL_RGBA ? GL_CLAMP_TO_EDGE : GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        free(image_data);
+    }
+    else
+    {
+        std::cout << "Texture failed to load at path: " << path << std::endl;
+        free(image_data);
+    }
+
+    return textureID;
 }
 
 int main(int argc, char const *argv[])
@@ -318,48 +352,73 @@ int main(int argc, char const *argv[])
 	std::vector<glm::vec3> nm_vector;
   std::vector<glm::vec3> tangent_vector;
   std::vector<glm::vec3> bitangent_vector;
-  for(int j = 0; j < 3*num_verts; j++){
+  for(int j = 0; j < num_verts; j++){
     nm_vector.insert(nm_vector.begin(),glm::vec3(0));
     tangent_vector.insert(tangent_vector.begin(),glm::vec3(0));
     bitangent_vector.insert(bitangent_vector.begin(),glm::vec3(0));
   }
   
-  
+  float normals[num_verts*3];  
   for(int i = 0; i < num_indices; i=i+3){
     int p1_index = faces[i];  //Get index for each vertices forming the triangle
     int p2_index = faces[i+1];
     int p3_index = faces[i+2];
     //Edges of the triangle
     // e_1, e_2
-    glm::vec3 u = glm::vec3(points[3*p2_index],points[3*p2_index+1],points[3*p2_index+2]) - glm::vec3(points[3*p1_index],points[3*p1_index+1],points[3*p1_index+2]);
-    glm::vec3 v = glm::vec3(points[3*p3_index],points[3*p3_index+1],points[3*p3_index+2]) - glm::vec3(points[3*p1_index],points[3*p1_index+1],points[3*p1_index+2]);
+    glm::vec3 u = glm::vec3((float)points[3*p2_index],(float)points[3*p2_index+1],(float)points[3*p2_index+2]) - glm::vec3((float)points[3*p1_index],(float)points[3*p1_index+1],(float)points[3*p1_index+2]);
+    glm::vec3 v = glm::vec3((float)points[3*p3_index],(float)points[3*p3_index+1],(float)points[3*p3_index+2]) - glm::vec3((float)points[3*p1_index],(float)points[3*p1_index+1],(float)points[3*p1_index+2]);
     //Compute normal for the triangle
     glm::vec3 nm = glm::vec3(u.y*v.z - u.z*v.y, u.z*v.x - u.x*v.z, u.x*v.y - u.y*v.x );
    
     nm_vector.at(p1_index) = nm;
     nm_vector.at(p2_index) = nm;
-    nm_vector.at(p2_index) = nm;
+    nm_vector.at(p3_index) = nm;
     
     //Tang/Bitang 
-    glm::vec2 f_1 = glm::vec2(points[2*p2_index],points[2*p2_index+1]) - glm::vec2(points[2*p1_index], points[2*p1_index+1]);
-    glm::vec2 f_2 = glm::vec2(points[2*p3_index],points[2*p3_index+1]) - glm::vec2(points[2*p1_index], points[2*p1_index+1]);
-    float r = 1.0f / (f_1.x * f_2.y - f_1.y * f_2.x);
-    glm::vec3 tangent = (u*v.y - v*u.y)*r;
-    glm::vec3 bitangent = (v*u.x - u*v.x)*r;
+    glm::vec2 f_1 = glm::vec2(uv_coords[2*p2_index],uv_coords[2*p2_index+1]) - glm::vec2(uv_coords[2*p1_index],uv_coords[2*p1_index+1]);
+    glm::vec2 f_2 = glm::vec2(uv_coords[2*p3_index],uv_coords[2*p2_index+1]) - glm::vec2(uv_coords[2*p1_index],uv_coords[2*p1_index+1]);
+    
+    float r = 1.0f / (f_1.x*f_2.y - f_1.y*f_2.x);
+    glm::vec3 tangent = (u * f_2.y - v * f_1.y)*r;
+    glm::vec3 bitangent = (v * f_1.x - u * f_2.x)*r;
     
     tangent_vector.at(p1_index) = tangent;
     tangent_vector.at(p2_index) = tangent;
     tangent_vector.at(p3_index) = tangent;
     
-    bitangent_vector.at(p1_index) = tangent;
-    bitangent_vector.at(p2_index) = tangent;
-    bitangent_vector.at(p3_index) = tangent;
-    
+    bitangent_vector.at(p1_index) = bitangent;
+    bitangent_vector.at(p2_index) = bitangent;
+    bitangent_vector.at(p3_index) = bitangent;
     
   }
   
-      
+    std::cout<< sizeof(normals)/sizeof(float)<<std::endl;
   
+    std::cout<< nm_vector.size() << " " << tangent_vector.size() << " " << bitangent_vector.size()<<std::endl;
+  
+    for(std::vector<glm::vec3>::iterator iter = bitangent_vector.begin(); iter != bitangent_vector.end(); iter++){
+       std::cout<< iter->x << " " << iter->y << " " << iter->z << std::endl;
+    }
+    
+    /*
+    std::vector<glm::vec3>::iterator iter = nm_vector.begin();
+    int j = 0;
+    for(int i = 0; i <= sizeof(normals)/sizeof(normals[0]); i+=3){
+      //std::cout<< normals[i] << " = " << iter->x << "  " <<normals[i+1] << " = " << iter->y<< " " << normals[i+2] << " = " << iter->z << std::endl;
+      if(normals[i] != iter->x){
+        std::cout<<" X MISS " << normals[i]<< " = " <<iter->x;
+      }
+      else if(normals[i+1] != iter->y)
+        std::cout<< " Y MISS " << normals[i+1] << " = " << iter->y;
+      else if(normals[i+2] != iter->z)
+        std::cout << " Z MISS " << normals[i+2] << " = " << iter->z;
+      else{
+          std::cout<<"HIT";
+      }
+      std::cout<<std::endl;
+      iter++;
+    }
+    */
     GLuint VAO,VBO,EBO,nmVBO,uvVBO,tanVBO,bitanVBO;
     glGenVertexArrays(1,&VAO);
     glBindVertexArray(VAO);
@@ -378,7 +437,8 @@ int main(int argc, char const *argv[])
     glVertexAttribPointer(0,3,GL_FLOAT,GL_FALSE,3*  sizeof(GLfloat),(GLvoid*)0);
     //Normals
     glBindBuffer(GL_ARRAY_BUFFER,nmVBO);
-    glBufferData(GL_ARRAY_BUFFER,nm_vector.size() * sizeof(float),&nm_vector[0],GL_STATIC_DRAW);  
+    glBufferData(GL_ARRAY_BUFFER,nm_vector.size() * 3 * sizeof(float),&nm_vector[0],GL_STATIC_DRAW);  
+    //glBufferData(GL_ARRAY_BUFFER,sizeof(normals),normals,GL_STATIC_DRAW);
     glVertexAttribPointer(1,3,GL_FLOAT,GL_FALSE,3*sizeof(GLfloat),(void*)0); //(void*)(3*sizeof(GLfloat) offset?
     //uv_coords
     glBindBuffer(GL_ARRAY_BUFFER,uvVBO);
@@ -386,11 +446,11 @@ int main(int argc, char const *argv[])
     glVertexAttribPointer(2,2,GL_FLOAT,GL_FALSE,2*sizeof(GLfloat),(void*)0);
     //tangent
     glBindBuffer(GL_ARRAY_BUFFER,tanVBO);
-    glBufferData(GL_ARRAY_BUFFER, tangent_vector.size()*sizeof(float), &tangent_vector[0],GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, tangent_vector.size()*3*sizeof(float), &tangent_vector[0],GL_STATIC_DRAW);
     glVertexAttribPointer(3,3,GL_FLOAT,GL_FALSE,3*sizeof(GLfloat),(void*)0);
     //bitangent
     glBindBuffer(GL_ARRAY_BUFFER,bitanVBO);
-    glBufferData(GL_ARRAY_BUFFER,bitangent_vector.size()*sizeof(float),&bitangent_vector[0],GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER,bitangent_vector.size()*3*sizeof(float),&bitangent_vector[0],GL_STATIC_DRAW);
     glVertexAttribPointer(4,3,GL_FLOAT,GL_FALSE,3*sizeof(GLfloat),(void*)0);
                  
   
@@ -406,22 +466,29 @@ int main(int argc, char const *argv[])
     glEnableVertexAttribArray(4);
     
     // Loading textures--------------------------------------------------------------------------------------------------------------------------------------//
-
-    
-    
+ 
+    /*
     GLuint numberline_handle, numberline_nmap_handle;
     //Numberlines
     glGenTextures(1,&numberline_handle);
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D,numberline_handle);
+
+    unsigned image_file = 
+    lodepng_decode32_file(&image_data,&image_w, &image_h,
+                            "../../common/data/numberline_hires.png");
+    std::cout << "Read " << image_h << " x " << image_w << " image\n";                          
+    glTexImage2D(GL_TEXTURE_2D,0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
   
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  
     //Nmaps
     glGenTextures(2,&numberline_nmap_handle);
-    glActiveTexture(GL_TEXTURE0);
+    glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D,numberline_nmap_handle);
     
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -429,25 +496,21 @@ int main(int argc, char const *argv[])
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     
-      
-  
-    unsigned char* image_data;
-    unsigned image_w;
-    unsigned image_h;
-  
-    unsigned image_file = 
-    lodepng_decode32_file(&image_data,&image_w, &image_h,
-                            "../../common/data/numberline_hires.png");
-    std::cout << "Read " << image_h << " x " << image_w << " image\n";                          
-    glTexImage2D(GL_TEXTURE_2D,0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
   
     lodepng_decode32_file(&image_data, &image_w, &image_h, 
                           "../../common/data/numberline_nmap_hires.png");
     std::cout << "Read " << image_h << " x " << image_w << " image\n";                       
   
+    glTexImage2D(GL_TEXTURE_2D,0,GL_RGBA,image_w,image_h,0,GL_RGBA,GL_UNSIGNED_BYTE,image_data);
+  
     glGenerateMipmap(GL_TEXTURE_2D);
-    glUniform1i(glGetUniformLocation(shader0.shader_program, "tex_sampler"),0);
-    glUniform1i(glGetUniformLocation(shader0.shader_program, "nmap_sampler"),1);  
+    */
+  
+    unsigned int nmap_handle = loadTexture("../../common/data/numberline_nmap_hires.png");
+    unsigned int tex_handle = loadTexture("../../common/data/numberline_hires.png");
+  
+    std::cout<<nmap_handle << " " <<tex_handle<<std::endl;
+  
     //Debugging cube
   /*
     std::vector<std::string> cube_faces = {
@@ -488,7 +551,9 @@ int main(int argc, char const *argv[])
 // load and compile shaders  "../lab1-7_vs.glsl" and "../lab1-7_fs.glsl"
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
   shader0.update("../lab3-3_vs.glsl","../lab3-3_fs.glsl");
-
+  
+  glUniform1i(glGetUniformLocation(shader0.shader_program, "tex_sampler"),0);
+  glUniform1i(glGetUniformLocation(shader0.shader_program, "nmap_sampler"),1);
   
  
   const float n = 1.0f;
@@ -560,6 +625,12 @@ int main(int argc, char const *argv[])
     GLuint transformLoc = glGetUniformLocation(shader0.shader_program,"projection");
     glUniformMatrix4fv(transformLoc,1,GL_FALSE,glm::value_ptr(projectionMatrix));
 
+    //Textures
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D,tex_handle);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D,nmap_handle);
+    
     // update other events like input handling 
     glfwPollEvents ();
     
