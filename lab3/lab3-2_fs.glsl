@@ -182,7 +182,7 @@ void main () {
   
 	vec4 lab2_colour = vec4(light_out,1.0);
   
-  frag_colour = tex + lab2_colour;
+  frag_colour = tex * lab2_colour;
 	
     
 }

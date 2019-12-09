@@ -190,7 +190,7 @@ void main () {
   for(int l = 0; l < light_count; ++l){
     vec3 L = normalize(light_position[l].xyz - world_pos);
     vec3 brdf = cook_torrance_brdf(L,V,N);
-    light_out += light_colour[l].xyz * brdf * max(dot(L,N),0.0);
+    light_out += 2*light_colour[l].xyz * brdf * max(dot(L,N),0.0);
   }
 
   frag_colour = vec4(light_out,1)*tex;//* vec4(light_out,1);
