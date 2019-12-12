@@ -1,2 +1,0 @@
-/usr/bin/ar qc libreadfile.a  CMakeFiles/readfile.dir/home/anton/Documents/graphic-design/lab1/common/readfile.cpp.o
-/usr/bin/ranlib libreadfile.a
