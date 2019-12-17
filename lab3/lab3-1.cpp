@@ -405,8 +405,9 @@ int main(int argc, char const *argv[])
      
     
     //-------------------------------------------------------------------------------------------------------------------------------------------------------//
-  
-	std::cout<< "GL_MAX_TEXTURE_UNITS = " << GL_MAX_TEXTURE_UNITS <<std::endl;  
+  	int texvalue;
+	glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS,&texvalue);
+	std::cout<< "GL_MAX_TEXTURE_UNITS = " << texvalue  <<std::endl;  
   
 //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 // load and compile shaders  "../lab1-7_vs.glsl" and "../lab1-7_fs.glsl"
