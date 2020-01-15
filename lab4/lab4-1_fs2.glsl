@@ -15,30 +15,11 @@ uniform float i_focal_dist;
 uniform int brdf_swapper;
 
 #define M_PI 3.1415926535897932384626433832795
-#define MAX_DEPTH 10
 #define NUM_SPHERES 5
 #define NUM_TRIANGLES 4
 #define MAX_SAMPLES 1
 
-struct Ray { vec3 origin, dir;float weight; };
-Ray ray_stack[MAX_DEPTH];
-int ray_stack_size = 0;
-
-void push(Ray ray){
-  if(ray_stack_size < MAX_DEPTH)
-  {
-    ray_stack[ray_stack_size] = ray;
-    ray_stack_size++;
-  }
-}
-  
-Ray pop(){
-  if(ray_stack_size > 0)
-  {
-    ray_stack_size--;
-    return ray_stack[ray_stack_size];
-  }
-}
+struct Ray { vec3 origin, dir; };
 
 struct Material{
   vec3 color_emission;
@@ -167,8 +148,8 @@ void init( float sun_bright )
 	scene.spheres[0].material.color_glossy = vec3( 1 );
 	scene.spheres[0].material.color_emission = vec3( 0 );
 	scene.spheres[0].material.roughness = 100;
-	scene.spheres[0].material.reflection = 1;
-	scene.spheres[0].material.transmission = 0;
+	scene.spheres[0].material.reflection = 0.5;
+	scene.spheres[0].material.transmission = 0.5;
 	scene.spheres[0].material.ior = 1;
   scene.spheres[0].material.color_brdf = vec3(0);
   scene.spheres[0].material.alpha = 0.3;
@@ -176,15 +157,15 @@ void init( float sun_bright )
   //Green medium
 	scene.spheres[1].center = vec3(0.8, 0.3, 0.8);
 	scene.spheres[1].radius = 0.3;
-	scene.spheres[1].material.color_diffuse = 0.1 * vec3( 0.0, 1.0, 0.0 );
+	scene.spheres[1].material.color_diffuse = 0.5 * vec3( 0.0, 1.0, 0.0 );
 	scene.spheres[1].material.color_glossy = vec3( 1 );
 	scene.spheres[1].material.roughness = 5000;
 	scene.spheres[1].material.color_emission = vec3( 0 );
 	scene.spheres[1].material.reflection = 0;
-	scene.spheres[1].material.transmission = 1;
-	scene.spheres[1].material.ior = 0.8;
+	scene.spheres[1].material.transmission = 0.8;
+	scene.spheres[1].material.ior = 0.1;
   scene.spheres[1].material.color_brdf = vec3(0);
-  scene.spheres[1].material.alpha = 0.8;
+  scene.spheres[1].material.alpha = 0.5;
   scene.spheres[1].material.metallic = 0.0;
   //Red small
 	scene.spheres[2].center = vec3(0.55, 0.1, 0.2) ;
@@ -195,7 +176,7 @@ void init( float sun_bright )
 	scene.spheres[2].material.color_emission = vec3( 3.6, 0, 0 );
 	scene.spheres[2].material.reflection = 0.0;
 	scene.spheres[2].material.transmission = 0.0;
-	scene.spheres[2].material.ior = 1.4;
+	scene.spheres[2].material.ior = 1;
   scene.spheres[2].material.color_brdf = vec3(0);
   scene.spheres[2].material.alpha = 0.1;
   scene.spheres[2].material.metallic = 0.0;
@@ -231,16 +212,16 @@ void init( float sun_bright )
   build_tetra(0.5,vec3(-2,1,0));
   for(int i = 0; i < NUM_TRIANGLES; i++){
     scene.triangles[i].normal = cross(scene.triangles[i].p1 - scene.triangles[i].p0, scene.triangles[i].p2 - scene.triangles[i].p0);
-    scene.triangles[i].material.color_diffuse = 10*vec3(0.2);
+    scene.triangles[i].material.color_diffuse = vec3(0.2);
     scene.triangles[i].material.color_glossy = vec3(1);
     scene.triangles[i].material.roughness = 100;
     scene.triangles[i].material.color_emission = vec3(0);
-    scene.triangles[i].material.reflection = 1.0;
+    scene.triangles[i].material.reflection = 0.0;
     scene.triangles[i].material.transmission = 0.0;
     scene.triangles[i].material.ior = 1.0;
     scene.triangles[i].material.color_brdf = vec3(0);
     scene.triangles[i].material.alpha = 0.50;
-    scene.triangles[i].material.metallic = 1.0;
+    scene.triangles[i].material.metallic = 0.0;
   }
   /*
     scene.triangles[0].normal = cross(scene.triangles[0].p1 - scene.triangles[0].p0, scene.triangles[0].p2 - scene.triangles[0].p0);
@@ -473,7 +454,7 @@ Intersection intersect( Ray ray)
       else if(brdf_swapper == 1) //blinn-phong
         I.material.color_brdf = blinn_phong_brdf(I.light_dir,I.view_dir,I.normal, scene.spheres[id].material) * incident_angle; 
       else if(brdf_swapper == 2) //Cook-torrance
-        I.material.color_brdf = cook_torrance_brdf(I.light_dir,I.view_dir,I.normal,scene.spheres[id].material) * incident_angle*20;
+        I.material.color_brdf = cook_torrance_brdf(I.light_dir,I.view_dir,I.normal,scene.spheres[id].material) * incident_angle*5;
       }
     }
     
@@ -572,54 +553,42 @@ Intersection intersect( Ray ray)
 }
 // Casts 1 depth rays for reflection/refraction
 // For more depth it should have recursion
-int outside = 1;
-vec3 raycast() 
+vec3 raycast(Ray ray) 
 {
   vec3 color = vec3(0.5);
-  for(int ray_stack_pos=0; ray_stack_pos < ray_stack_size; ++ray_stack_pos){
-    Ray ray = ray_stack[ray_stack_pos];
-    Intersection isec = intersect(ray);
-      
-    if(isec.hit){
-      Ray shadow_feeler;
-      shadow_feeler.origin = ray.origin + ray.dir*isec.t + 0.00001;
-      shadow_feeler.dir = normalize(scene.sun_position - shadow_feeler.origin);
-      Intersection shadow_isec = intersect(shadow_feeler);
-      if(shadow_isec.hit){
-        color *= 0.1;
-      }
-      
-    }
+  Intersection isec = intersect(ray);
 
-    if(isec.material.reflection > 0.0) {
-      Ray refl;
-      refl.dir = normalize(reflect(ray.dir,isec.normal));
-      refl.origin = dot(refl.dir,isec.normal) < 0.0 ? isec.point - isec.normal*1e-3 : isec.point + isec.normal*1e-3;
-      //Intersection ref_isec = intersect(refl);
-      refl.weight = (1+isec.material.ior)-refl.weight/2;
-      push(refl);
-      
-      //isec.material.color_brdf += ref_isec.material.color_brdf + ref_isec.material.color_emission;
-      //color += ref_isec.material.color_brdf + ref_isec.material.color_emission;
-      //isec.material.color_brdf *= refl.weight;
+  if(isec.hit){
+    Ray shadow_feeler;
+    shadow_feeler.origin = ray.origin + ray.dir*isec.t + 0.001;
+    shadow_feeler.dir = normalize(scene.sun_position - shadow_feeler.origin);
+    Intersection shadow_isec = intersect(shadow_feeler);
+    if(shadow_isec.hit){
+      isec.material.color_brdf *= 0.1;
     }
-    
-    if(isec.material.transmission > 0.0){
-      Ray refr;
-      refr.dir = dot(ray.dir,isec.normal) < 0.0 ? normalize(refract(ray.dir,isec.normal,1.0/isec.material.ior)) : normalize(refract(ray.dir,-isec.normal, isec.material.ior/1.0));
-      refr.origin = dot(ray.dir,isec.normal) < 0.0 ? isec.point - isec.normal*1e-3 : isec.point + isec.normal*1e-3;
-      //refr.origin = isec.point - isec.normal*1e-6;
-      refr.weight = (1+isec.material.ior)-refr.weight/2;
-    
-      //Intersection refr_isec = intersect(refr);
-      push(refr);
-      //color += refr_isec.material.color_brdf+refr_isec.material.color_emission;
-    }
-    //ray.weight=1;
-    color *= ray.weight*(isec.material.color_brdf + isec.material.color_emission);
-    
   }
-  return 5*color;
+  
+  if(isec.material.reflection > 0.0) {
+    Ray refl;
+    refl.dir = normalize(reflect(ray.dir,isec.normal));
+    refl.origin = dot(refl.dir,isec.normal) < 0.0 ? isec.point - isec.normal*1e-3 : isec.point + isec.normal*1e-3;
+    
+    Intersection ref_isec = intersect(refl);
+    isec.material.color_brdf *= ref_isec.material.color_brdf + ref_isec.material.color_emission;
+  }
+  
+  if(isec.material.transmission > 0.0){
+    Ray refr;
+    refr.dir = normalize(refract(ray.dir,isec.normal,1.0/isec.material.ior));
+    refr.origin = dot(refr.dir,isec.normal) < 0.0 ? isec.point - isec.normal*1e-3 : isec.point + isec.normal*1e-3;
+    refr.origin = isec.point - isec.normal*1e-3;
+    
+    Intersection refr_isec = intersect(refr);
+    isec.material.color_brdf += 0.5*refr_isec.material.color_brdf;
+  }
+
+  color = isec.material.color_brdf + isec.material.color_emission;
+  return color;
 }
 
 void main() {
@@ -642,10 +611,9 @@ void main() {
 	Ray ray;
 	ray.origin = i_position;
   ray.dir = normalize(cx*gl_FragCoord.x + cy*gl_FragCoord.y + cz*f_dist);
-  ray.weight = 1;
-  push(ray);
   
-  vec3 color = raycast();
+  
+  vec3 color = raycast(ray);
 	//linear blend, will look terrible
 	// o_fragment_color =  vec4((color),1);
 
@@ -653,6 +621,5 @@ void main() {
 	o_fragment_color = vec4( pow ( clamp(color.xyz/num_samples, 0., 1.), vec3(1./2.2)), 1.); 
 	///\todo REMOVE THIS LINE after you have the triangles set up
 }
-
 
 
