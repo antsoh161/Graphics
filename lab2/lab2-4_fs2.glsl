@@ -133,7 +133,7 @@ vec3 cook_torrance_brdf(vec3 light_dir, vec3 view_dir, vec3 normal){
   
 vec3 cook_torrance_brdf(vec3 L, vec3 V, vec3 N){
   vec3 albedo = normalize(vec3(253,227,78)); // Albedo of gold
-  float metallic = 0.0;
+  float metallic = 1.0;
   vec3 F0 = vec3(0.04);
   F0 = mix(F0,albedo,metallic);
   vec3 H = normalize(V+L);
