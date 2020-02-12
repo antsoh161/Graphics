@@ -1,1 +1,0 @@
-/usr/bin/c++  -O3 -DNDEBUG  -rdynamic CMakeFiles/lab4-2.dir/lab4-2.cpp.o  -o lab4-2 -lGL -lGLU -lglfw -lGLEW liblodepng.a libreadfile.a 
