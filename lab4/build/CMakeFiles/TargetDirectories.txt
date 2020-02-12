@@ -1,0 +1,8 @@
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/edit_cache.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/rebuild_cache.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/lodepng.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/lab4-1.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/lab4-2.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/readfile.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/lab4-3.dir
+/home/anton/Documents/graphic-design/lab4/build/CMakeFiles/lab4-4.dir
